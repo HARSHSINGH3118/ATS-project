@@ -1,31 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import KanbanBoard from "../components/KanbanBoard";
-import AddCandidateForm from "../components/AddCandidateForm";
+import AnalyticsDashboard from "../components/AnalyticsDashboard";
 
-export default function Dashboard() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const refreshBoard = () => setRefreshKey((prev) => prev + 1);
-
+export default function Dashboard({ setToken }) {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
-      <Navbar />
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Job Applications</h1>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-          >
-            ➕ Add Candidate
-          </button>
-        </div>
+    <div className="flex flex-col h-screen">
+      {/* Sticky Navbar */}
+      <Navbar setToken={setToken} />
 
-        <KanbanBoard key={refreshKey} />
-        <AddCandidateForm isOpen={isOpen} setIsOpen={setIsOpen} refresh={refreshBoard} />
-      </div>
+      {/* Main Content */}
+      <main className="flex-1 pt-20 px-6 bg-gray-100 dark:bg-gray-900 overflow-y-auto">
+        <Routes>
+          <Route path="kanban" element={<KanbanBoard />} />
+          <Route path="analytics" element={<AnalyticsDashboard />} />
+        </Routes>
+      </main>
     </div>
   );
 }

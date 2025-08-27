@@ -1,76 +1,79 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Moon, Sun, LogOut } from "lucide-react";
 
-export default function Navbar() {
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
+export default function Navbar({ setToken }) {
+  const [darkMode, setDarkMode] = useState(() => {
+    return (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    );
+  });
+
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
+    const root = document.documentElement;
     if (darkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+      root.classList.add("dark");
+      localStorage.theme = "dark";
     } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      root.classList.remove("dark");
+      localStorage.theme = "light";
     }
   }, [darkMode]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    setToken(null);
     navigate("/login");
   };
 
-  const navLinks = [
-    { to: "/dashboard", label: "Kanban" },
-    { to: "/analytics", label: "Analytics" },
-  ];
+  const navLinkClass = ({ isActive }) =>
+    `px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+      isActive
+        ? "bg-blue-600 text-white shadow"
+        : "text-gray-800 dark:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-700/60"
+    }`;
 
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-r from-gray-900 via-blue-900 to-gray-900 text-white shadow-lg">
+    <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-        {/* Left: Logo */}
-        <Link
-          to="/dashboard"
-          className="text-2xl font-extrabold text-yellow-400 tracking-wide hover:scale-105 transition-transform"
-        >
-          ATS Dashboard
-        </Link>
+        {/* Brand */}
+        <div className="text-xl font-semibold text-gray-900 dark:text-gray-100 tracking-tight">
+          Mini ATS
+        </div>
 
-        {/* Right: Nav links + controls */}
+        {/* Right Side: Nav links + Actions */}
         <div className="flex items-center gap-6">
           {/* Navigation Links */}
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`relative px-2 py-1 font-medium transition-colors
-                ${
-                  location.pathname === link.to
-                    ? "text-yellow-400 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-yellow-400 after:rounded-full"
-                    : "text-gray-300 hover:text-yellow-300"
-                }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <NavLink to="/dashboard/kanban" className={navLinkClass}>
+            Kanban
+          </NavLink>
+          <NavLink to="/dashboard/analytics" className={navLinkClass}>
+            Analytics
+          </NavLink>
 
           {/* Theme Toggle */}
           <button
             onClick={() => setDarkMode(!darkMode)}
-            className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-all"
+            className="p-2 rounded-full bg-gray-200/70 dark:bg-gray-700/70 hover:scale-105 transition"
+            aria-label="Toggle Dark Mode"
           >
-            {darkMode ? "🌙" : "☀️"}
+            {darkMode ? (
+              <Sun className="w-5 h-5 text-yellow-400" />
+            ) : (
+              <Moon className="w-5 h-5 text-gray-800 dark:text-gray-200" />
+            )}
           </button>
 
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full shadow-md transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition"
           >
-            Logout
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </div>
