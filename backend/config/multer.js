@@ -1,16 +1,16 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("./cloudinary");
+const path = require("path");
+const fs = require("fs");
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: "ats_resumes",
-      resource_type: "auto",   
-      public_id: file.originalname.split(".")[0]
-    };
-  }
+// Ensure uploads folder exists
+const uploadDir = path.join(__dirname, "../uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 
 const upload = multer({ storage });

@@ -1,9 +1,10 @@
 const express = require("express");
-const router = express.Router();
 const Candidate = require("../models/Candidate");
-const upload = require("../config/multer");   
+const upload = require("../config/multer");
 
- 
+const router = express.Router();
+
+// Add candidate
 router.post("/", async (req, res) => {
   try {
     const candidate = new Candidate(req.body);
@@ -14,7 +15,7 @@ router.post("/", async (req, res) => {
   }
 });
 
- 
+// Get candidates with filters
 router.get("/", async (req, res) => {
   try {
     const filters = {};
@@ -28,67 +29,45 @@ router.get("/", async (req, res) => {
   }
 });
 
- 
+// Update candidate
 router.put("/:id", async (req, res) => {
   try {
-    const candidate = await Candidate.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const candidate = await Candidate.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(candidate);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
- 
+// Upload resume
 router.post("/:id/uploadResume", upload.single("resume"), async (req, res) => {
   try {
-    console.log("File received:", req.file);
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-    if (!req.file || !req.file.path) {
-      return res.status(400).json({ error: "Resume upload failed" });
-    }
-
-     
-    const candidate = await Candidate.findByIdAndUpdate(
-      req.params.id,
-      { resumeLink: req.file.path },
-      { new: true }
-    );
-
+    const filePath = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    const candidate = await Candidate.findByIdAndUpdate(req.params.id, { resumeLink: filePath }, { new: true });
     res.json(candidate);
   } catch (err) {
-    console.error("Upload Error:", err);
     res.status(400).json({ error: err.message });
   }
 });
 
- 
+// Analytics
 router.get("/analytics/data", async (req, res) => {
   try {
     const candidates = await Candidate.find();
-
     const stageCount = { Applied: 0, Interview: 0, Offer: 0, Rejected: 0 };
     const roleCount = {};
     let totalExp = 0;
 
-    candidates.forEach(c => {
+    candidates.forEach((c) => {
       stageCount[c.status]++;
       roleCount[c.role] = (roleCount[c.role] || 0) + 1;
       totalExp += c.experience;
     });
 
-    const avgExp = candidates.length
-      ? (totalExp / candidates.length).toFixed(1)
-      : 0;
-
-    res.json({
-      stageCount,
-      roleCount,
-      averageExperience: avgExp
-    });
+    const avgExp = candidates.length ? (totalExp / candidates.length).toFixed(1) : 0;
+    res.json({ stageCount, roleCount, averageExperience: avgExp });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
