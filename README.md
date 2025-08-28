@@ -155,4 +155,5 @@ View analytics with charts (role distribution, stage distribution, average exper
 | POST   | /\:id/uploadResume | form-data {resume}  | Upload resume to Cloudinary                            |
 | GET    | /analytics/data    | —                   | Stage count, role count, experience avg, resumes count |
 
-
+## Demo Video
+Demo link : https://drive.google.com/file/d/1OgacKI3--_-LpClIRte9mexv26oQdWVD/view?usp=drivesdk 
